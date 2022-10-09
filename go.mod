@@ -15,6 +15,7 @@ require (
 	github.com/golangid/graphql-go v0.0.9
 	github.com/gomodule/redigo v1.8.4
 	github.com/google/uuid v1.3.0
+	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75 // indirect
 	github.com/gorilla/websocket v1.5.0
 	github.com/hashicorp/consul/api v1.8.1
 	github.com/jarcoal/httpmock v1.0.8
@@ -22,6 +23,7 @@ require (
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0
 	github.com/lib/pq v1.10.4
+	github.com/lnquy/cron v1.1.1 // indirect
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/soheilhy/cmux v0.1.5
 	github.com/streadway/amqp v1.0.0

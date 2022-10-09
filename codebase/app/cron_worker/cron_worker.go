@@ -17,6 +17,7 @@ import (
 	"github.com/golangid/candi/codebase/factory/types"
 	"github.com/golangid/candi/logger"
 	"github.com/golangid/candi/tracer"
+	"github.com/lnquy/cron"
 )
 
 type cronWorker struct {
@@ -66,12 +67,17 @@ func NewWorker(service factory.ServiceFactory, opts ...OptionFunc) factory.AppSe
 				job.Handler = handler
 				job.Interval = interval
 				job.Params = args
+
+				// Convert cron expression to human readable
+				exprDesc, _ := cron.NewDescriptor()
+				desc, _ := exprDesc.ToDescription(interval, cron.Locale_en)
+
 				if err := AddJob(job); err != nil {
 					panic(fmt.Errorf(`Cron Worker: "%s" %v`, interval, err))
 				}
 
 				c.semaphore[funcName] = make(chan struct{}, c.opt.maxGoroutines)
-				logger.LogYellow(fmt.Sprintf(`[CRON-WORKER] (job name): %s (every): %-8s  --> (module): "%s"`, `"`+funcName+`"`, interval, m.Name()))
+				logger.LogYellow(fmt.Sprintf(`[CRON-WORKER] (job name): %s (run): %-8s  --> (module): "%s"`, `"`+funcName+`"`, desc, m.Name()))
 			}
 		}
 	}
@@ -116,6 +122,10 @@ START:
 				workers[job.WorkerIndex].Chan = reflect.ValueOf(job.ticker.C)
 				activeJobs[chosen].nextDuration = nil
 			}
+
+			logger.LogYellow(fmt.Sprintf("[CRON-WORKER] NAME ==>> %s", job.HandlerName))
+			logger.LogYellow(fmt.Sprintf("[CRON-WORKER] DURATION ==>> %s", job.currentDuration))
+			logger.LogYellow(fmt.Sprintf("[CRON-WORKER] NEXT DURATION ==>> %s", job.nextDuration))
 
 			if len(c.semaphore[job.HandlerName]) >= c.opt.maxGoroutines {
 				continue
@@ -226,7 +236,11 @@ func (c *cronWorker) processJob(job *Job) {
 	trace.SetTag("job_param", job.Params)
 
 	if c.opt.debugMode {
-		log.Printf("\x1b[35;3mCron Scheduler: executing task '%s' (interval: %s)\x1b[0m", job.HandlerName, job.Interval)
+		// Convert cron expression to human readable
+		exprDesc, _ := cron.NewDescriptor()
+		desc, _ := exprDesc.ToDescription(job.Interval, cron.Locale_en)
+
+		log.Printf("\x1b[35;3mCron Scheduler: executing task '%s' (next run: %s)\x1b[0m", job.HandlerName, desc)
 	}
 
 	var eventContext candishared.EventContext
