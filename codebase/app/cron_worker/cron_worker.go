@@ -123,10 +123,6 @@ START:
 				activeJobs[chosen].nextDuration = nil
 			}
 
-			logger.LogYellow(fmt.Sprintf("[CRON-WORKER] NAME ==>> %s", job.HandlerName))
-			logger.LogYellow(fmt.Sprintf("[CRON-WORKER] DURATION ==>> %s", job.currentDuration))
-			logger.LogYellow(fmt.Sprintf("[CRON-WORKER] NEXT DURATION ==>> %s", job.nextDuration))
-
 			if len(c.semaphore[job.HandlerName]) >= c.opt.maxGoroutines {
 				continue
 			}
